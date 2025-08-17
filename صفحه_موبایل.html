@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>راز موفقیت</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body{
+      margin:0; padding:0; font-family:"Vazir", Tahoma, sans-serif; background:linear-gradient(135deg,#0f2027,#203a43,#2c5364); color:#eee; display:flex; justify-content:center; align-items:center; height:100vh;
+    }
+    .app{
+      width:400px; max-width:95vw; height:700px; background:rgba(28,28,28,0.9); border-radius:24px; backdrop-filter:blur(10px); box-shadow:0 12px 40px rgba(0,0,0,0.7); display:flex; flex-direction:column; padding:20px; overflow-y:auto; transition:all .3s ease;
+    }
+    .app:hover{ box-shadow:0 16px 50px rgba(0,0,0,0.9); transform:translateY(-4px); }
+    h1{
+      text-align:center; font-size:28px; margin:12px 0 22px; font-family:"IranNastaliq", cursive; color:#dcdcdc; text-shadow:1px 1px 3px rgba(0,0,0,0.7);
+    }
+    .nav{
+      display:flex; flex-direction:column; gap:12px;
+    }
+    .nav button{
+      padding:14px; border:none; border-radius:14px; background:linear-gradient(145deg,#2b2b2b,#1e1e1e); color:#bbb; font-size:17px; cursor:pointer; transition:.3s; box-shadow:inset 2px 2px 5px #111,inset -2px -2px 5px #2e2e2e;
+    }
+    .nav button:hover{
+      background:linear-gradient(145deg,#00c6ff,#0072ff); color:#fff; transform:translateY(-3px) scale(1.02);
+    }
+    .section{ display:none; margin-top:20px; }
+    .section h3{ margin-bottom:12px; border-bottom:1px solid #444; padding-bottom:8px; color:#eee; font-weight:500; }
+    .controls{ display:flex; gap:8px; margin-bottom:12px; }
+    .controls input{ flex:1; padding:10px; border:none; border-radius:8px; background:#333; color:#fff; box-shadow:inset 1px 1px 4px #111,inset -1px -1px 4px #444; }
+    .controls button{ padding:10px 14px; background:#00bcd4; color:#fff; border:none; border-radius:8px; cursor:pointer; transition:.3s; box-shadow:2px 2px 6px rgba(0,0,0,0.6);
+    }
+    .controls button:hover{ background:#0097a7; transform:scale(1.05); }
+    .item{ display:flex; justify-content:space-between; align-items:center; background:linear-gradient(145deg,#262626,#1a1a1a); padding:10px; border-radius:10px; margin-bottom:10px; box-shadow:2px 2px 6px rgba(0,0,0,0.6), -2px -2px 6px rgba(255,255,255,0.05); transition:.2s; }
+    .item:hover{ transform:scale(1.01); }
+    .item span{ flex:1; margin-right:8px; color:#ddd; }
+    .actions button{ background:none; border:none; color:#bbb; font-size:18px; cursor:pointer; margin-left:6px; transition:.2s; }
+    .actions button:hover{ color:#ff5252; transform:scale(1.2); }
+    .week{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .week button{ flex:1; padding:8px; border:none; border-radius:8px; background:linear-gradient(145deg,#2b2b2b,#1f1f1f); color:#aaa; cursor:pointer; transition:.3s; box-shadow:inset 2px 2px 4px #111,inset -2px -2px 4px #2e2e2e; }
+    .week button:hover{ background:linear-gradient(145deg,#00c6ff,#0072ff); color:#fff; transform:translateY(-2px); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>راز موفقیت</h1>
+    <div class="nav">
+      <button onclick="showSection('notes')">یادداشت ها</button>
+      <button onclick="showSection('daily')">کارهای روزمره</button>
+      <button onclick="showSection('weekly')">تقسیم اوقات هفته وار</button>
+    </div>
+
+    <div id="notes" class="section">
+      <h3>یادداشت ها</h3>
+      <div class="controls">
+        <input id="noteInput" type="text" placeholder="یادداشت جدید...">
+        <button onclick="addNote()"><i class="fa fa-plus"></i></button>
+      </div>
+      <ul id="notesList"></ul>
+    </div>
+
+    <div id="daily" class="section">
+      <h3>کارهای روزمره</h3>
+      <div class="controls">
+        <input id="dailyInput" type="text" placeholder="کار جدید...">
+        <button onclick="addDaily()"><i class="fa fa-plus"></i></button>
+      </div>
+      <div id="dailyList"></div>
+    </div>
+
+    <div id="weekly" class="section">
+      <h3>تقسیم اوقات هفته وار</h3>
+      <div class="week">
+        <button onclick="showDay('Sat')">Sat</button>
+        <button onclick="showDay('Sun')">Sun</button>
+        <button onclick="showDay('Mon')">Mon</button>
+        <button onclick="showDay('Tue')">Tue</button>
+        <button onclick="showDay('Wed')">Wed</button>
+        <button onclick="showDay('Thu')">Thu</button>
+        <button onclick="showDay('Fri')">Fri</button>
+      </div>
+      <div id="dayContent"></div>
+    </div>
+  </div>
+
+  <script>
+    function saveData(key,data){ localStorage.setItem(key, JSON.stringify(data)); }
+    function loadData(key){ const d = localStorage.getItem(key); return d?JSON.parse(d):[]; }
+    function showSection(id){ document.querySelectorAll('.section').forEach(s=>s.style.display='none'); document.getElementById(id).style.display='block'; }
+
+    // Notes
+    function renderNotes(){ const notes = loadData('notes'); const list = document.getElementById('notesList'); list.innerHTML=''; notes.forEach((n,i)=>{
+      const li=document.createElement('li'); li.className='item';
+      const span=document.createElement('span'); span.textContent=n;
+      const act=document.createElement('div'); act.className='actions';
+      const edit=document.createElement('button'); edit.innerHTML='<i class="fa fa-pen"></i>'; edit.onclick=()=>{const t=prompt('ویرایش یادداشت:',n); if(t){ notes[i]=t; saveData('notes',notes); renderNotes(); }};
+      const del=document.createElement('button'); del.innerHTML='<i class="fa fa-trash"></i>'; del.onclick=()=>{ notes.splice(i,1); saveData('notes',notes); renderNotes(); };
+      act.appendChild(edit); act.appendChild(del);
+      li.appendChild(span); li.appendChild(act);
+      list.appendChild(li);
+    }); }
+    function addNote(){ const input=document.getElementById('noteInput'); if(input.value.trim()!==''){ const notes=loadData('notes'); notes.push(input.value.trim()); saveData('notes',notes); input.value=''; renderNotes(); }}
+
+    // Daily
+    function renderDaily(){ const tasks=loadData('daily'); const list=document.getElementById('dailyList'); list.innerHTML=''; tasks.forEach((t,i)=>{
+      const div=document.createElement('div'); div.className='item';
+      const span=document.createElement('span'); span.innerHTML=`<input type='checkbox' ${t.done?'checked':''} onchange='toggleDaily(${i})'> ${t.text}`;
+      const act=document.createElement('div'); act.className='actions';
+      const edit=document.createElement('button'); edit.innerHTML='<i class="fa fa-pen"></i>'; edit.onclick=()=>{const nt=prompt('ویرایش کار:',t.text); if(nt){ tasks[i].text=nt; saveData('daily',tasks); renderDaily(); }};
+      const del=document.createElement('button'); del.innerHTML='<i class="fa fa-trash"></i>'; del.onclick=()=>{ tasks.splice(i,1); saveData('daily',tasks); renderDaily(); };
+      act.appendChild(edit); act.appendChild(del);
+      div.appendChild(span); div.appendChild(act);
+      list.appendChild(div);
+    }); }
+    function addDaily(){ const input=document.getElementById('dailyInput'); if(input.value.trim()!==''){ const tasks=loadData('daily'); tasks.push({text:input.value.trim(),done:false}); saveData('daily',tasks); input.value=''; renderDaily(); }}
+    function toggleDaily(i){ const tasks=loadData('daily'); tasks[i].done=!tasks[i].done; saveData('daily',tasks); renderDaily(); }
+
+    // Weekly
+    function showDay(day){ const c=document.getElementById('dayContent'); c.innerHTML=`<h4>${day}</h4><div class='controls'><input id='taskInput-${day}' placeholder='کار جدید...'><button onclick='addTask("${day}")'><i class="fa fa-plus"></i></button></div><div id='tasks-${day}'></div>`; renderTasks(day); }
+    function renderTasks(day){ const tasks=loadData('tasks-'+day); const list=document.getElementById('tasks-'+day); list.innerHTML=''; tasks.forEach((t,i)=>{
+      const div=document.createElement('div'); div.className='item';
+      const span=document.createElement('span'); span.innerHTML=`<input type='checkbox' ${t.done?'checked':''} onchange='toggleTask("${day}",${i})'> ${t.text}`;
+      const act=document.createElement('div'); act.className='actions';
+      const edit=document.createElement('button'); edit.innerHTML='<i class="fa fa-pen"></i>'; edit.onclick=()=>{const nt=prompt('ویرایش کار:',t.text); if(nt){ tasks[i].text=nt; saveData('tasks-'+day,tasks); renderTasks(day); }};
+      const del=document.createElement('button'); del.innerHTML='<i class="fa fa-trash"></i>'; del.onclick=()=>{ tasks.splice(i,1); saveData('tasks-'+day,tasks); renderTasks(day); };
+      act.appendChild(edit); act.appendChild(del);
+      div.appendChild(span); div.appendChild(act);
+      list.appendChild(div);
+    }); }
+    function addTask(day){ const input=document.getElementById('taskInput-'+day); if(input.value.trim()!==''){ const tasks=loadData('tasks-'+day); tasks.push({text:input.value.trim(),done:false}); saveData('tasks-'+day,tasks); input.value=''; renderTasks(day); }}
+    function toggleTask(day,i){ const tasks=loadData('tasks-'+day); tasks[i].done=!tasks[i].done; saveData('tasks-'+day,tasks); renderTasks(day); }
+
+    renderNotes(); renderDaily();
+  </script>
+</body>
+</html>
